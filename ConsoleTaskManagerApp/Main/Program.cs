@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Main
 {
@@ -7,74 +8,85 @@ namespace Main
     {
         static void Main(string[] args)
         {
-            string command;
+            string path = @"F:\Coderslab.NET\01_Podstawy\CL_NET_Week1_TaskManagerApp\tasks.txt";
+            int idCounter = 0;
             List<TaskModel> tasksToWrite = new List<TaskModel> { };
+            // przy otwarciu programu wszystkie dane z pliku tekstowego sa parsowane i wciagane jako zadania na liste, 
+            string[] stringsFromFile = File.ReadAllLines(path);
+            foreach (string s in stringsFromFile)
+            {
+                TaskModel taskFromString = TaskModel.ParseTaskModelFromString(s);
+                tasksToWrite.Add(taskFromString);
+                idCounter = taskFromString.Id;
+            }
+            // po wczytaniu zadan do listy plik jest czyszczony
+            File.Delete(path);
+            File.Create(path).Close();
+            // w tej chwili zadania istieja tylko na liscie
+            Console.WriteLine("Witaj w aplikacji do zarządzania zadaniami.");
+            string command;
             while (true)
             {
-                Console.WriteLine("Witaj w aplikacji do zarządzania zadaniami. " +
+                Console.WriteLine("\n==============================================================" +
                                 "\nDostępne komendy:" +
-                                "\nexit - wyjście z programu," +
-                                "\nadd - dodanie zadania" +
-                                "\ndel - usuwanie zadania" +
-                                "\nsave - zapis do pliku" +
-                                "\nshow - wczytuj zadania");
+                                "\t\t\nexit - wyjście z programu wraz z zapisem zmian (zalecana komenda)," +
+                                "\t\t\nadd - dodanie nowego zadania" +
+                                "\t\t\ndel - usuwanie wybranego zadania" +
+                                "\t\t\nsave - zapis zadań do pliku tekstowego (niezalecana komenda - mozliwa utrata danych" +
+                                "\t\t\nshow - pokaż wszystkie zadania");
                 command = Console.ReadLine();
-                if (command == "exit")
-                {
-                    Console.WriteLine("Koniec programu.");
-                    break;
-                }
                 if (command == "add")
                 {
-                    string taskDescription;
-                    DateTime startTime;
-                    // =========================================== pobranie opisu zadania
-                    Console.WriteLine("Podaj opis zadania: ");
-                    taskDescription = Console.ReadLine();
-                    // =========================================== pobranie czasu rozpoczęcia
-                    Console.WriteLine("Czy zadanie ma się rozpoczynać w chwili obecnej? Wpisanie {t} oznacza akceptację: ");
-                    if (Console.ReadLine() == "t")
-                    {
-                        startTime = DateTime.Now;
-                        Console.WriteLine("Jezeli t: " + startTime.ToString());
-                    }
-                    else
-                    {
-                        Console.WriteLine("Przypisanie deklarowanej daty rozpoczęcia.");
-                        DateTimeCatcher startCatcher = new DateTimeCatcher();
-                        startTime = startCatcher.Catch();
-                        Console.WriteLine("Jezeli n: " + startTime.ToString());
-                    }
-                    // =========================================== właściwe utworzenie zadania przez konstruktor
-                    TaskModel task = new TaskModel(taskDescription, startTime.ToString());
-                    Console.WriteLine("Utworzono nowe zadanie.");
-                    // =========================================== ustalenie czasu trwania zadania -> czasu zakończenia
-                    Console.WriteLine("Czy zadanie jest całodniowe? Wpisanie {t} oznacza potwierdzenie: ");
-                    if (Console.ReadLine() == "t")
-                    {
-                        task.WholeDayTask = true;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Zadanie na godziny. Podaj przewidywany czas trwania zadania: ");
-                        DurationCatcher durationCatcher = new DurationCatcher();
-                        int taskDurationInHours = durationCatcher.Catch();
-                        DateTime endTime = startTime.AddHours((double)taskDurationInHours);
-                        task.EndDate = endTime.ToString();
-                    }
-                    // =========================================== ustalenie ważności
-                    Console.WriteLine("Czy zadanie ważne? Wpisanie {t} oznacza potwierdzenie: ");
-                    if (Console.ReadLine() == "t")
-                    {
-                        task.ImportantTask = true;
-                    }
-                    // =========================================== ostatecznie dodanie gotowego zadania do listy
-                    tasksToWrite.Add(task);
+                    idCounter++;
+                    TaskModel currentTask = TaskModel.AddTask(idCounter);
+                    tasksToWrite.Add(currentTask);
                     Console.WriteLine("Dodano zadanie do listy.");
                 }
                 if (command == "del")
                 {
-                    Console.WriteLine("Usuwanie zadania");
+                    Console.WriteLine("Podaj numer zadania do usunięcia: ");
+                    try
+                    {
+                        List<TaskModel> newTasksToWrite = new List<TaskModel> { };
+                        int numToDel = Int32.Parse(Console.ReadLine());
+                        foreach (TaskModel tm in tasksToWrite)
+                        {
+                            if (tm.Id != numToDel)
+                            {
+                                newTasksToWrite.Add(tm);
+                            }
+                        }
+                        tasksToWrite = newTasksToWrite;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
+                if (command == "save" || command == "exit")
+                {
+                    Console.WriteLine("Zapis do pliku");
+                    List<string> stringsFromTasks = new List<string> { };
+                    foreach (TaskModel tm in tasksToWrite)
+                    {
+                        string tmp = tm.ToString();
+                        stringsFromTasks.Add(tmp);
+                    }
+                    File.WriteAllLines(path, stringsFromTasks.ToArray());
+                    tasksToWrite = new List<TaskModel> { };
+                    if (command == "exit")
+                    {
+                        Console.WriteLine("Koniec programu.");
+                        break;
+                    }
+                }
+                if (command == "show")
+                {
+                    Console.WriteLine("Zadania z listy: ");
+                    foreach (TaskModel tm in tasksToWrite)
+                    {
+                        Console.WriteLine(tm.ToString());
+                    }
                 }
             }
         }
