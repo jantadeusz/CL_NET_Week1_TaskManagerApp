@@ -8,85 +8,68 @@ namespace Main
     {
         static void Main(string[] args)
         {
-            string path = @"F:\Coderslab.NET\01_Podstawy\CL_NET_Week1_TaskManagerApp\tasks.txt";
+            ConsoleColor currentForeground = Console.ForegroundColor;
             int idCounter = 0;
-            List<TaskModel> tasksToWrite = new List<TaskModel> { };
-            // przy otwarciu programu wszystkie dane z pliku tekstowego sa parsowane i wciagane jako zadania na liste, 
-            string[] stringsFromFile = File.ReadAllLines(path);
-            foreach (string s in stringsFromFile)
-            {
-                TaskModel taskFromString = TaskModel.ParseTaskModelFromString(s);
-                tasksToWrite.Add(taskFromString);
-                idCounter = taskFromString.Id;
-            }
-            // po wczytaniu zadan do listy plik jest czyszczony
-            File.Delete(path);
-            File.Create(path).Close();
-            // w tej chwili zadania istieja tylko na liscie
-            Console.WriteLine("Witaj w aplikacji do zarządzania zadaniami.");
+            TaskCollector taskCollector = new TaskCollector();
+            ConsoleEx.WriteLine("Witaj w aplikacji do zarządzania zadaniami.", currentForeground);
             string command;
             while (true)
             {
-                Console.WriteLine("\n==============================================================" +
+                ConsoleEx.WriteLine("\n==============================================================" +
                                 "\nDostępne komendy:" +
-                                "\t\t\nexit - wyjście z programu wraz z zapisem zmian (zalecana komenda)," +
-                                "\t\t\nadd - dodanie nowego zadania" +
-                                "\t\t\ndel - usuwanie wybranego zadania" +
-                                "\t\t\nsave - zapis zadań do pliku tekstowego (niezalecana komenda - mozliwa utrata danych" +
-                                "\t\t\nshow - pokaż wszystkie zadania");
+                                "\n\t\texit - wyjście z programu wraz z zapisem zmian," +
+                                "\n\t\tadd - dodanie nowego zadania" +
+                                "\n\t\tdel - usuwanie wybranego zadania" +
+                                "\n\t\tsave - zapis zadań do pliku tasks.csv" +
+                                "\n\t\tshow - pokaż wszystkie zadania" +
+                                "\n\t\tload - załaduj zadania z pliku tasks.csv" +
+                                "\n\t\tcolor - zmiana koloru wyswietlanego tekstu", currentForeground);
                 command = Console.ReadLine();
                 if (command == "add")
                 {
                     idCounter++;
-                    TaskModel currentTask = TaskModel.AddTask(idCounter);
-                    tasksToWrite.Add(currentTask);
-                    Console.WriteLine("Dodano zadanie do listy.");
+                    TaskModel currentTask = TaskModel.CreateTask(idCounter);
+                    taskCollector.AddTask(currentTask);
+                    ConsoleEx.WriteLine("Dodano zadanie do listy.", currentForeground);
                 }
                 if (command == "del")
                 {
-                    Console.WriteLine("Podaj numer zadania do usunięcia: ");
-                    try
-                    {
-                        List<TaskModel> newTasksToWrite = new List<TaskModel> { };
-                        int numToDel = Int32.Parse(Console.ReadLine());
-                        foreach (TaskModel tm in tasksToWrite)
-                        {
-                            if (tm.Id != numToDel)
-                            {
-                                newTasksToWrite.Add(tm);
-                            }
-                        }
-                        tasksToWrite = newTasksToWrite;
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
+                    ConsoleEx.WriteLine("Podaj numer zadania do usunięcia: ", currentForeground);
+                    int numToDel = Int32.Parse(Console.ReadLine());
+                    taskCollector.RemoveTask(numToDel);
                 }
                 if (command == "save" || command == "exit")
                 {
-                    Console.WriteLine("Zapis do pliku");
-                    List<string> stringsFromTasks = new List<string> { };
-                    foreach (TaskModel tm in tasksToWrite)
-                    {
-                        string tmp = tm.ToString();
-                        stringsFromTasks.Add(tmp);
-                    }
-                    File.WriteAllLines(path, stringsFromTasks.ToArray());
-                    tasksToWrite = new List<TaskModel> { };
+                    taskCollector.ExportTasks(currentForeground);
                     if (command == "exit")
                     {
-                        Console.WriteLine("Koniec programu.");
+                        ConsoleEx.WriteLine("Koniec programu.", currentForeground);
                         break;
                     }
                 }
                 if (command == "show")
                 {
-                    Console.WriteLine("Zadania z listy: ");
-                    foreach (TaskModel tm in tasksToWrite)
-                    {
-                        Console.WriteLine(tm.ToString());
-                    }
+                    //taskCollector.ShowTasksAscendingId(currentForeground);
+                    taskCollector.ShowTasksAscendigDate(currentForeground);
+                }
+                if (command == "load")
+                {
+                    idCounter = taskCollector.LoadTasks(currentForeground);
+                }
+                if (command == "color")
+                {
+                    ConsoleEx.WriteLine("Wpisz numer sposrod dostepnych kolorow tekstu: " +
+                        "\n\tWhite = 1, " +
+                        "\n\tRed = 2," +
+                        "\n\tBlue = 3," +
+                        "\n\tYellow = 4," +
+                        "\n\tGreen = 5", currentForeground);
+                    string newColour = Console.ReadLine();
+                    if (newColour == "1") { currentForeground = ConsoleColor.White; }
+                    if (newColour == "2") { currentForeground = ConsoleColor.Red; }
+                    if (newColour == "3") { currentForeground = ConsoleColor.Blue; }
+                    if (newColour == "4") { currentForeground = ConsoleColor.Yellow; }
+                    if (newColour == "5") { currentForeground = ConsoleColor.Green; }
                 }
             }
         }

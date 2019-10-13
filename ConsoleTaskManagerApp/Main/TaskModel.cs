@@ -50,12 +50,12 @@ namespace Main
             Description = desc;
             StartDate = sd;
         }
-        public static TaskModel AddTask(int identityNumber)
+        public static TaskModel CreateTask(int identityNumber)
         {
             string taskDescription;
             DateTime startTime;
             // =========================================== pobranie opisu zadania
-            Console.WriteLine("Podaj opis zadania: ");
+            Console.WriteLine("Podaj opis zadania (Uwaga: nie używaj przecinków): ");
             taskDescription = Console.ReadLine();
             // =========================================== pobranie czasu rozpoczęcia
             Console.WriteLine("Czy zadanie ma się rozpoczynać w chwili obecnej? Wpisanie {t} oznacza akceptację: ");
@@ -94,15 +94,15 @@ namespace Main
             return thisTask;
         }
 
-        public string ToString()
+        public string ToStringWithCommas()
         {
-            return Id + "|" + Description + "|" + StartDate + "|" + WholeDayTask + "|" + ImportantTask + "|" + EndDate;
+            return Id + "," + Description + "," + StartDate + "," + WholeDayTask + "," + ImportantTask + "," + EndDate;
         }
 
         public static TaskModel ParseTaskModelFromString(string taskFromFile)
         {
             TaskModel tm = new TaskModel();
-            string[] taskInfo = taskFromFile.Split('|');
+            string[] taskInfo = taskFromFile.Split(',');
             try
             {
                 int id = Int32.Parse(taskInfo[0]);
@@ -134,6 +134,16 @@ namespace Main
                 Console.WriteLine("Blad odczytu danych z pliku. Tresc błędu: " + e);
             }
             return tm;
+        }
+        public static void ShowTaskInTable(TaskModel tm, ConsoleColor currentForeground)
+        {
+            int width = 15;
+            ConsoleEx.WriteLine(tm.Id.ToString().PadRight(width) + "|" +
+            tm.Description.PadRight(width) + "|" +
+            tm.StartDate.ToString().PadRight(width) + "|" +
+            //tm.EndDate.ToString().PadRight(width) + "|" +
+            tm.WholeDayTask.ToString().PadRight(width) + "|" +
+            tm.ImportantTask.ToString().PadRight(width), currentForeground);
         }
     }
 }
