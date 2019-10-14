@@ -61,14 +61,6 @@ namespace Main
             File.AppendAllLines(path, stringsFromTasks.ToArray());
             tasks = new List<TaskModel> { };
         }
-        /*public void ShowTasksAscendingId(ConsoleColor currentForeground)
-        {
-            ConsoleEx.WriteLine("Zadania z listy: ", currentForeground);
-            foreach (TaskModel tm in tasks)
-            {
-                ConsoleEx.WriteLine(tm.ToString(), currentForeground);
-            }
-        }*/
         public void ShowTasksAscendigDate(ConsoleColor currentForeground)
         {
             List<TaskModel> importantTasks = new List<TaskModel> { };
@@ -84,13 +76,13 @@ namespace Main
                     otherTasks.Add(taskModel);
                 }
             }
-            int width = 15;
-            string naglowek = "Id".PadRight(width) + "|" +
-                                "Description".PadRight(width) + "|" +
-                                "Start Date".PadRight(width) + "|" +
-                                "End Date".PadRight(width) + "|" +
-                                "WholeDayTask".PadRight(width) + "|" +
-                                "ImportantTask".PadRight(width);
+            int width = 20;
+            string naglowek = "Id".PadLeft(width) + "|" +
+                               "Description".PadLeft(width) + "|" +
+                               "Start Date".PadLeft(width) + "|" +
+                               "End Date".PadLeft(width) + "|" +
+                               "WholeDayTask".PadLeft(width) + "|" +
+                               "ImportantTask".PadLeft(width);
 
             ConsoleEx.WriteLine("==============================================", currentForeground);
             ConsoleEx.WriteLine("Zadania ważne: ", currentForeground);
@@ -100,7 +92,7 @@ namespace Main
             {
                 try
                 {
-                    TaskModel.ShowTaskInTable(taskModel, currentForeground);
+                    TaskModel.ShowTaskInTable(taskModel, width, currentForeground);
                 }
                 catch (Exception e)
                 {
@@ -115,7 +107,7 @@ namespace Main
             {
                 try
                 {
-                    TaskModel.ShowTaskInTable(taskModel, currentForeground);
+                    TaskModel.ShowTaskInTable(taskModel, width, currentForeground);
                 }
                 catch (Exception e)
                 {

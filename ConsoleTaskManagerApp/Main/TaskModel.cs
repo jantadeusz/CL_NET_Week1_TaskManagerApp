@@ -135,15 +135,19 @@ namespace Main
             }
             return tm;
         }
-        public static void ShowTaskInTable(TaskModel tm, ConsoleColor currentForeground)
+        public static void ShowTaskInTable(TaskModel tm, int columnWidth, ConsoleColor currentForeground)
         {
-            int width = 15;
-            ConsoleEx.WriteLine(tm.Id.ToString().PadRight(width) + "|" +
-            tm.Description.PadRight(width) + "|" +
-            tm.StartDate.ToString().PadRight(width) + "|" +
-            //tm.EndDate.ToString().PadRight(width) + "|" +
-            tm.WholeDayTask.ToString().PadRight(width) + "|" +
-            tm.ImportantTask.ToString().PadRight(width), currentForeground);
+            string strStart = tm.Id.ToString().PadLeft(columnWidth) + "|" +
+                              tm.Description.PadLeft(columnWidth) + "|" +
+                              tm.StartDate.ToString().PadLeft(columnWidth) + "|";
+            string strMiddle = "-".PadLeft(columnWidth) + "|";
+            string strEnd = tm.WholeDayTask.ToString().PadLeft(columnWidth) + "|" +
+                            tm.ImportantTask.ToString().PadLeft(columnWidth) + "|";
+            if (tm.EndDate != null)
+            {
+                strMiddle = tm.EndDate.ToString().PadLeft(columnWidth) + "|";
+            }
+            ConsoleEx.WriteLine(strStart + strMiddle + strEnd, currentForeground);
         }
     }
 }
